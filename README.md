@@ -13,9 +13,6 @@
     ├── quic_initial_1.bin
     └── quic_initial_2.bin
 
-
-
-
 ## Credits / Авторы
 
 * **Идея и разработка:** [@mizerweb](https://github.com/mizerweb)
