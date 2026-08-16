@@ -1,5 +1,6 @@
 import os
 import socket
+import re
 
 def main():
     folder_name = 'QUICs'
@@ -13,12 +14,19 @@ def main():
 
     # Запускаем основной цикл работы скрипта
     while True:
-        # 2. Получаем список файлов (внутри цикла, на случай если вы добавите файлы во время работы)
+        # 2. Получаем список файлов (обновляется при каждой новой итерации цикла)
         files = [f for f in os.listdir(folder_name) if os.path.isfile(os.path.join(folder_name, f))]
         
+        # Если файлов нет, не закрываем скрипт, а даем возможность их добавить
         if not files:
-            print(f"\nВ папке '{folder_name}' пока нет файлов. Поместите туда .bin дампы.")
-            break
+            print(f"\n❌ В папке '{folder_name}' пока нет файлов. Поместите туда .bin дампы.")
+            empty_choice = input("👉 Закиньте файлы и введите 'U' для обновления (или 'N' для выхода): ").strip().lower()
+            if empty_choice == 'u':
+                print("\n🔄 Обновление списка файлов...")
+                continue
+            else:
+                print("Завершение работы скрипта. До свидания!")
+                break
 
         # 3. Выводим список файлов с номерами
         print("\n" + "—"*28)
@@ -32,26 +40,36 @@ def main():
         print(" ИНСТРУКЦИЯ ПО ВВОДУ:")
         print(" СИНТАКСИС: <номер_файла> <домен>")
         print(" ПРИМЕР:    1 youtube.com")
+        print(" ОБНОВЛЕНИЕ: Введите 'U', чтобы обновить список файлов")
         print("="*55 + "\n")
 
         # 5. Обработка ввода
         try:
-            user_input_raw = input("👉 Введите номер и домен: ").strip()
+            user_input_raw = input("👉 Введите номер и домен (или 'U' для обновления): ").strip()
+            
+            # --- ИСПРАВЛЕНИЕ: КОМАНДА ОБНОВЛЕНИЯ СПИСКА ---
+            if user_input_raw.lower() == 'u':
+                print("\n🔄 Обновление списка файлов...")
+                continue
+                
             user_input = user_input_raw.split()
             
             if len(user_input) != 2:
                 print("\n❌ ОШИБКА: Неверный формат ввода!")
                 print("Нужно ввести ровно два значения через пробел.")
-                continue # Возвращаемся в начало цикла (не закрываем скрипт)
+                continue
                 
             file_num_str, domain = user_input
             
             # Очистка домена
-            if domain.startswith("http://"):
-                domain = domain.replace("http://", "")
-            if domain.startswith("https://"):
-                domain = domain.replace("https://", "")
-            domain = domain.rstrip("/")
+            domain = re.sub(r'^(https?://|://)', '', domain)
+            domain = domain.split('/')[0]
+            domain = domain.split(':')[0]
+            
+            # Проверка длины DNS
+            if len(domain) > 253 or any(len(label) > 63 for label in domain.split('.')):
+                print("\n❌ [ОШИБКА] Введен слишком длинный домен! Максимальная длина — 253 символа.")
+                continue
                 
             file_num = int(file_num_str)
             
@@ -116,7 +134,7 @@ def main():
             choice = input("Хотите выполнить еще один тест? (y - продолжить / n - выйти): ").strip().lower()
             if choice == 'n':
                 print("Завершение работы скрипта. До свидания!")
-                break # Выходим из цикла и завершаем программу
+                break
             elif choice != 'y':
                 print("Неизвестная команда, но я предполагаю, что мы продолжаем :)")
         except KeyboardInterrupt:
