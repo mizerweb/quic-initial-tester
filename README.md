@@ -17,4 +17,4 @@
 ## Credits / Авторы
 
 * **Идея и разработка:** [@mizerweb](https://github.com/mizerweb)
-* **Написание кода:** Gemini AI
+* **Написание кода:** Gemini AI & Claude AI
